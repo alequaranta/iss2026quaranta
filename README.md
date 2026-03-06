@@ -4,7 +4,9 @@ Laboratorio di <b>Ingegneria dei Sistemi Software</b> a.a. 2025/2026 di Quaranta
  [Testo di riferimento](https://anatali.github.io/issLab2026/_static/docs/Protobook.pdf)
  <!-- comment: [ancora personalizzata] -->
 
-  <h2 id="Index">SPRINT docs:</h2> [INDEX] (https://alequaranta.github.io/iss2026quaranta/sprintdocs.html)
+  <h2 id="Index">SPRINT docs:</h2>
+
+  [INDEX](https://alequaranta.github.io/iss2026quaranta/sprintdocs.html)
 
  <h2 id="ParteA">Parte A: Dai programmi ai Sistemi a Microservizi</h2>
 
