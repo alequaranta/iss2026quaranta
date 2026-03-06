@@ -29,11 +29,12 @@ di una interfaccia grafica di interazione con l'utente, per realizzare il <b>req
  
 <!-- <div class="remark"> -->
 <pre>
-R1: Realizzare una versione in Java del gioco Life di Conway, come gioco zero-player. 
+	
+- 	R1: Realizzare una versione in Java del gioco Life di Conway, come gioco zero-player. 
     Il gioco consiste nell’introdurre una Griglia di Celle il cui stato (cella ‘viva’ o cella ‘morta’) 
     evolve come stabilito dallle regole di ConwayLife
 
-R2: L’utente umano deve poter:
+- 	R2: L’utente umano deve poter:
      - specificare la configurazione iniziale della griglia del gioco	
      - vedere l’evoluzione del gioco in forma opportuna 
         (si veda <a href='https://anatali.github.io/issLab2026/_static/docs/Protobook.pdf#section.6.3'>Problema della vista del gioco</a> )
@@ -44,19 +45,50 @@ R2: L’utente umano deve poter:
   
 
 <h2>Requirement analysis</h2>
+<pre>
+	
+-	L’obiettivo di questa fase è l’evoluzione del sistema ConwayLife 
+	senza alterarne la logica di business fondamentale sviluppata nello Sprint 1. 
+	
+	La versione distribuita (file .jar) dello Sprint 1 è stata generata escludendo le librerie esterne, 
+	per essere utilizzata essa stessa come libreria nel progetto dello Sprint 2.
+	
+-	La GUI si dovrà attenere alla seguente interfaccia:
+	
+	<code>
+	public interface IOutDev {
+		
+		public void display(String msg);      //For HMI
+		
+		public void displayCell(IGrid grid, int x, int y); 
+		  
+		public void close();
+		
+		public void displayGrid(IGrid grid);
+
+	}
+	</code>
+
+</pre>
  
 
 <h2>Problem analysis</h2>
- 
 
 <h2>Test plans</h2> 
 
-
 <h2>Project</h2> 
- 
- 
+ <pre>
+	
+-	In questa versione il sistema è configurato con Swing: <a href='https://github.com/alequaranta/iss2026quaranta/blob/main/ConwayLife/Sprint2/conway26JavaSwing/src/main/java/conway/devices/ConwayLifeGridClaude.java'>Codice Configurazione Swing</a>
+	
+ </pre>
 
 <h2>Testing</h2> 
+<pre>
+	
+-	<a href='github.com/alequaranta/iss2026quaranta/blob/main/ConwayLife/Sprint2/conway26JavaSwing/src/main/java/test/ConwayLifeTest.java'>Test ConwayLife</a>
+
+</pre>
  
 
 <h2>Deployment</h2> 
@@ -78,10 +110,10 @@ R2: L’utente umano deve poter:
 </div>  
 
 <div style="background-color:rgba(86, 56, 253, 0.9); width:60%;text-align:left;color:white">
-By studentName email: student@studio.unibo.it, 
-<!-- <img src="./img/mbot-S.jpg" alt="mbot" width="15%" height="15%"> -->
-<img src="./img/emiglio.png" alt="emiglio" width="15%" height="15%">
-GIT repo: https://github.com/... 
+	By studentName email: alessandro.quaranta@studio.unibo.it, 
+	<!-- <img src="./img/mbot-S.jpg" alt="mbot" width="15%" height="15%"> -->
+	<img src="./img/alessandro.jpg" alt="emiglio" width="15%" height="15%">
+	GIT repo: https://github.com/alequaranta/iss2026quaranta
 </div> 
 </body>
 </html>
