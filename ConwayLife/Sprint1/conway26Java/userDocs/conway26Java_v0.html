@@ -49,7 +49,7 @@ limitatamente al <b>requisito  R1</b>.
 	
 	Viene formalizzato il seguente modello a partire dai requisiti:
 	
--	L'entità Cella rappresenta l'elemento più semplice del sistema; è un entità atomica,
+-	L'entità <b>Cella</b> rappresenta l'elemento più semplice del sistema; è un entità atomica,
 	il suo comportamento prevede due stati: viva o morta.
 	
 	<code>
@@ -65,7 +65,7 @@ limitatamente al <b>requisito  R1</b>.
 		}
 	</code>
 	
--	L'entità Griglia è un aggregato di Celle. Il suo comportamento mira
+-	L'entità <b>Griglia</b> è un aggregato di Celle. Il suo comportamento mira
 	a gestire l'insieme di celle che rappresenta.
 	
 	Esempio domande al committente:
@@ -98,7 +98,7 @@ limitatamente al <b>requisito  R1</b>.
 	}
     </code>
 	
--	L'entità Life rappresenterà le regole di gioco. Life ha una relazione di 
+-	L'entità <b>Life</b> rappresenterà le regole di gioco. Life ha una relazione di 
 	molteplicità con la Griglia tale da gestirne una alla volta.
 	
 	<code>
@@ -146,7 +146,7 @@ limitatamente al <b>requisito  R1</b>.
 <h2>Test plans</h2> 
 <pre>
 	
--	CellTest: Test sul comportamento della cella
+-	<b>CellTest</b>: Test sul comportamento della cella
 
 <code>
 	public class CellTest {
@@ -182,7 +182,7 @@ limitatamente al <b>requisito  R1</b>.
 </code>
 
 	
--	GridTest: Test sul comportamento della griglia.
+-	<b>GridTest</b>: Test sul comportamento della griglia.
 
 <code>
 	public class GridTest {
@@ -234,8 +234,7 @@ limitatamente al <b>requisito  R1</b>.
 	
 </code>
 	
--	LifeTest: Test sul corretto funzionamento delle regole;
-	il test si basa su comportamenti con configurazioni iniziali note.
+-	<b>LifeTest</b>: Test su Life
 	
 <code>
 	public class LifeTest {
@@ -290,13 +289,52 @@ limitatamente al <b>requisito  R1</b>.
 
 
 <h2>Project</h2> 
- 
- 
+<pre>
+	
+ 	<b>main.java.conway.domain</b>
+	Vengono implementate le interfacce sopra descritte nella seguente maniera:
+	
+-	<a href='https://github.com/alequaranta/iss2026quaranta/blob/main/ConwayLife/Sprint1/conway26Java/src/main/java/conway/domain/Cell.java'>Codice Cell</a>
+	Lo stato della cella (viva o morta) è rappresentata da un intero.
+
+- 	<a href='https://github.com/alequaranta/iss2026quaranta/blob/main/ConwayLife/Sprint1/conway26Java/src/main/java/conway/domain/Grid.java'>Codice Griglia</a>
+	Una matrice di celle.
+
+- 	<a href='https://github.com/alequaranta/iss2026quaranta/blob/main/ConwayLife/Sprint1/conway26Java/src/main/java/conway/domain/Life.java'>Codice Life</a>
+	Usa due griglie per calcolare la generazione successiva.
+	Implementa le regole del gioco.
+
+	Viene implementato un controller che fungerà da regista del gioco:
+	
+-	<a href='https://github.com/alequaranta/iss2026quaranta/blob/main/ConwayLife/Sprint1/conway26Java/src/main/java/conway/domain/GameController.java'>Interfaccia Controller</a>
+	<a href='https://github.com/alequaranta/iss2026quaranta/blob/main/ConwayLife/Sprint1/conway26Java/src/main/java/conway/domain/LifeController.java'>Codice LifeController</a>
+
+	A partire da ICell, IGrid e LifeInterface è possibile definire un contratto di output:
+
+-	<a href='https://github.com/alequaranta/iss2026quaranta/blob/main/ConwayLife/Sprint1/conway26Java/src/main/java/conway/domain/IOutDev.java'>Interfaccia IOutDev</a>
+
+	<b>main.java.conway.devices</b>
+	Mock per test GUI SPRINT1.
+
+</pre>
 
 <h2>Testing</h2> 
+
+<pre>
+
+-	Oltre ai test pensati nel Test Plans, viene aggiungo un test 
+	sul corretto funzionamento delle regole basato su comportamenti noti:
+	<a href='https://github.com/alequaranta/iss2026quaranta/tree/main/ConwayLife/Sprint1/conway26Java/src/main/java/test'>Test</a>
+	
+</pre>
  
 
 <h2>Deployment</h2> 
+<pre>
+	
+	conway26Java-1.0.jar
+	
+</pre>
 
  
 <h2>Maintenance</h2> 

@@ -13,17 +13,17 @@ public class CellTest {
 
 	@Before
 	public void setup() {
-		System.out.println("ConwayLifeTest | setup");	
+		System.out.println("Cell Test | setup");	
 	    c = new Cell();
 	}
 	@After
 	public void down() {
-		System.out.println("ConwayLifeTest | down");
+		System.out.println("Cell Test | down");
 	}
 	
 	@Test
 	public void testCellAlive() {
-		System.out.println("ConwayLifeTest | doing alive");
+		System.out.println("Cell Test | doing alive");
 		c.setStatus(true);
 		boolean r = c.isAlive();
 		assertTrue(r);
@@ -32,7 +32,7 @@ public class CellTest {
 	
 	@Test
 	public void testCellDead() {
-		System.out.println("ConwayLifeTest | doing dead");
+		System.out.println("Cell Test | doing dead");
 		c.setStatus(false);
 		boolean r = c.isAlive();
 		assertTrue( !r);

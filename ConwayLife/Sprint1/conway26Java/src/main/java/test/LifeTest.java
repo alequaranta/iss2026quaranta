@@ -19,16 +19,17 @@ private LifeInterface lifeModel;
 
 	@Before
 	public void setup() {
-		System.out.println("GridTest | setup");	
+		System.out.println("LifeTest | setup");	
 		lifeModel = Life.CreateLife(5, 5);
 	}
 	@After
 	public void down() {
-		System.out.println("GridTest | down");
+		System.out.println("LifeTest | down");
 	}
 	
 	@Test
     void testIsAliveAfterSet() {
+		System.out.println("LifeTest | cell is alive");
         lifeModel.setCell(3, 3, true);
         boolean state = lifeModel.isAlive(3, 3);
 
@@ -37,12 +38,14 @@ private LifeInterface lifeModel;
 	
 	@Test
     void testSetCellDead() {
+		System.out.println("LifeTest | cell is dead");
         lifeModel.setCell(2, 2, false);
         assertFalse(lifeModel.isAlive(2, 2));
     }
 	
 	@Test
     void testGetCell() {
+		System.out.println("LifeTest | get cell");
         ICell cell = lifeModel.getCell(0, 0);
 
         assertNotNull(cell);
@@ -50,6 +53,7 @@ private LifeInterface lifeModel;
 	
 	 @Test
 	    void testGetGrid() {
+		 System.out.println("LifeTest | get grid");
 	        IGrid grid = lifeModel.getGrid();
 
 	        assertNotNull(grid);
