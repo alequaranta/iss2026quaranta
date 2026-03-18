@@ -16,8 +16,10 @@ Laboratorio di <b>Ingegneria dei Sistemi Software</b> a.a. 2025/2026 di Quaranta
    in Java con dispositivi Mock di I/O. <i>Distribuzione</i>: file jar.
  * [ConwayLife Sprint2]: <b>evoluzione</b> del primo prototipo
    con un dispositivo di output realizzato in Swing. <i>Distribuzione</i>: file jar
- ### Sistemi come servizi
- * ...
+
  ### Sistema ConwayLife con pagine HTML
  * [ConwayLife Sprint3: evoluzione del sistema in locale
    usando una pagina HTML come dispositivo di I/O. <i>Distribuzione</i>: Docker yaml.
+
+ ### Sistemi come servizi
+ * ...
