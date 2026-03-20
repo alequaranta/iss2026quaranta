@@ -76,6 +76,33 @@
 	Creremo una classe WebOutDev che implementi il contratto imposto da <a href='https://github.com/alequaranta/iss2026quaranta/blob/main/ConwayLife/Sprint1/conway26Java/src/main/java/conway/domain/IOutDev.java'>IOutDev</a>
 	per la gestione della visualizzazione della GUI
 	
+-	Definiamo sintassi e semantica dei messaggi scambiati tra le entità attive tramite l'interfaccia:
+	<code>
+		package unibo.basicomm23.interfaces;
+
+		public interface IApplMessage {
+
+		    public String msgId();
+		    public String msgType();
+		    public String msgSender();
+		    public String msgReceiver();
+		    public String msgContent();
+		    public String msgNum();
+
+		    public boolean isDispatch();
+		    public boolean isRequest();
+		    public boolean isReply();
+		    public boolean isEvent();
+
+		    public void setConn( Interaction conn );
+		    public Interaction getConn(   );
+
+		    public String toJsonString();
+		}
+	</code> 
+	
+	Un messaggio ApplMessagge sotto forma di stringa: msg( MSGID, MSGTYPE, SENDER, RECEIVER, CONTENT, SEQNUM ) 
+	
 </pre>
  
 
@@ -86,9 +113,15 @@
 <h2>Test plans</h2> 
 
 <h2>Project</h2> 
- <pre>
+<pre>
 	
- </pre>
+-	Server <a href='https://github.com/alequaranta/iss2026quaranta/blob/main/ConwayLife/intSprint3/conway26GuiHtml/src/main/java/conway/io/IoJavalin.java'>IoJavalin</a>
+
+-	Nuova implementazione del contratto IOutDev <a href='https://github.com/alequaranta/iss2026quaranta/blob/main/ConwayLife/intSprint3/conway26GuiHtml/src/main/java/conway/io/WebOutDev.java'>WebOutDev</a>
+
+-	<a href='https://github.com/alequaranta/iss2026quaranta/tree/main/ConwayLife/intSprint3/conway26GuiHtml/src/main/resources/page'>File</a> statici erogati dal Server 
+	
+</pre>
 <h2>Testing</h2> 
  
 
