@@ -1,0 +1,120 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+
+<link rel="stylesheet" type="text/css" href="css/mystyle.css">
+<!--
+    <script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+    
+</head>
+   
+<title>conway26GUIHtml</title></head>
+    
+
+<body>
+<div id="top">
+<h1>ConwayLife Sprint3</h1>
+</div>  
+
+<div class="body">  
+
+<h2>Introduction</h2>
+<b>Goal</b>: Realizzare una GUI HTML per il gioco Conway Game of Life.
+ 
+<h2>Requirements</h2>
+
+ 
+<!-- <div class="remark"> -->
+<pre>
+
+-   Realizzare una GUI HTML per il gioco Conway Game of Life.
+	
+- 	1. Chi comanda?. Nel caso di più utenti, questi potranno vedere la stessa griglia o ognuno vedrà la sua griglia?
+	
+	• il committente precisa che tutti gli utenti potranno vedere la evoluzione della stessa griglia, ma solo
+	uno potrà inviare comandi di gestione del gioco. Questo utente privilegiato (detto owner) sarà l’utente che
+	ha aperto per primo la pagina HTML.
+	
+	2. Chi crea la GUI? Si modifica il Progetto ConwayLife26 o è meglio lasciare il più possibile inalterato questo
+	software già testato?
+	
+	• meglio modificare meno possibile ciò che già funziona. Il Progetto ConwayLife26 è stato impostato in
+	modo da essere estendibile senza dover modificare la logica del gioco. In particolare, la parte di output
+	della GUI potrebbe essere aggiornata introducendo una nuova classe che implementa la IOutDev interface
+	in modo da visualizzare lo stato delle celle nella pagina HTML.
+	
+	• vi sono framework che permettono di realizzare pagine HTML che interagiscono con un server senza dover
+	modificare il software già realizzato in Java.
+	
+	3. Come si aggiorna? La pagina HTML deve essere aggiornata in modo automatico o l’utente deve premere un
+	pulsante per vedere lo stato delle celle?
+	
+	• la pagina HTML deve essere aggiornata in modo automatico (per tutti gli utenti connessi) durante la
+	evoluzione del gioco, senza che un utente debba fare nulla. Questo richiede l’uso di WebSocket che per-
+	mettono di inviare messaggi dal server alla pagina HTML.
+	
+	
+</pre>
+  
+
+<h2>Requirement analysis</h2>
+<pre>
+	
+-	Una GUI HTML comporta l'introduzione di un Framework (Server) in grado di erogare pagine Web.
+	Viene scelto Javalin in quanto non impone architettura, layer, dependency injection o pattern specifici.
+
+-	Il primo Utente a connettersi al servizio erogato sarà considerato "Owner" della partita.
+	
+-	La versione distribuita (file .jar) dello <a href='https://github.com/alequaranta/iss2026quaranta/blob/main/ConwayLife/Sprint1'>Sprint1</a> è stata generata escludendo le librerie esterne. 
+	Sarà utilizzata come libreria nel progetto dello Sprint 3.
+
+-	L'appplicativo verrà eseguito direttamente dal componente Server Javalin
+
+	<img src="./img/internal.jpg" alt="emiglio" width="40%" height="40%">
+	
+	Creremo una classe WebOutDev che implementi il contratto imposto da <a href='https://github.com/alequaranta/iss2026quaranta/blob/main/ConwayLife/Sprint1/conway26Java/src/main/java/conway/domain/IOutDev.java'>IOutDev</a>
+	per la gestione della visualizzazione della GUI
+	
+</pre>
+ 
+
+<h2>Problem analysis</h2>
+<pre>
+</pre>
+
+<h2>Test plans</h2> 
+
+<h2>Project</h2> 
+ <pre>
+	
+ </pre>
+<h2>Testing</h2> 
+ 
+
+<h2>Deployment</h2> 
+
+ 
+<h2>Maintenance</h2> 
+ 
+<!-- USEFUL
+<table style="width:100%" border="1">
+<tr>
+<td style="width:50%">
+</td>
+<td></td>
+</tr>
+</table>
+-->
+	      	
+<br/><br/> 	
+</div>  
+
+<div style="background-color:rgba(86, 56, 253, 0.9); width:60%;text-align:left;color:white">
+	By studentName email: alessandro.quaranta@studio.unibo.it, 
+	<!-- <img src="./img/mbot-S.jpg" alt="mbot" width="15%" height="15%"> -->
+	<img src="./img/alessandro.jpg" alt="emiglio" width="15%" height="15%">
+	GIT repo: https://github.com/alequaranta/iss2026quaranta
+</div> 
+</body>
+</html>
