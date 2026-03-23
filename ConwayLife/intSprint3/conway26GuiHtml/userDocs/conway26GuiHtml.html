@@ -108,6 +108,24 @@
 
 <h2>Problem analysis</h2>
 <pre>
+
+-	Il Server Javalin sfrutterà la tecnoligia WebSocket in quanto bidirezionali
+	ed abilitanti ad interazione asincrona.
+	
+-	IoJavalin dovrà eseguire l'applicativo e gestire le connessioni.
+	
+	Useremo una lista di connesioni:
+	<code>
+		private WsConnectContext ownerCtx;
+		private final List<WsMessageContext> allCtx = new CopyOnWriteArrayList<>();
+	</code>
+	
+	Il primo utente a connettersi sarà considerato "owner" e sarà l'unico
+	capace di eseguire comandi sul controller:
+	<code>
+		if(!ctx.equals(ownerCtx)) return;
+	</code>
+
 </pre>
 
 <h2>Test plans</h2> 
@@ -126,7 +144,11 @@
  
 
 <h2>Deployment</h2> 
+<pre>
 
+-	Build dell'immagine e distribuzione tramite Docker
+
+</pre>
  
 <h2>Maintenance</h2> 
  
