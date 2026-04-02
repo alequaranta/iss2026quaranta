@@ -193,13 +193,40 @@
 <pre>
 
 -	<b>SERVER</b>
-	
--	Server 
 
--	Nuova implementazione del contratto IOutDev <a href='https://github.com/alequaranta/iss2026quaranta/blob/main/ConwayLife/intSprint3/conway26GuiHtml/src/main/java/conway/io/WebOutDev.java'>WebOutDev</a>
+	<b><a href='https://github.com/alequaranta/iss2026quaranta/tree/main/ConwayLife/Sprint3/conway26GuiHtml/src/main/resources/page'>File statici e Script</a></b>
+	I file statici erogati dal Server seguono quanto detto nell'analisi "Nuova pagina HTML".
+	Il file HTML predispone un canvas HTML5 sul quale sarà disegnata la griglia di gioco.
+	Un apposito script (wscanvascontrol.js) si occuperà di: 
+		- creare una connesione Web Socket
+		- inviare comandi al controller
+		- ricevere e visualizzare la griglia di gioco
+	  
+	<b><a href='https://github.com/alequaranta/iss2026quaranta/blob/main/ConwayLife/Sprint3/conway26GuiHtml/src/main/java/conway/io/IoJavalin.java'>Server Javalin - IoJavalin.java</a></b>
+ 	Il Server si occupa dell'erogazione dei file statici e relativi script, di creare gli endpoint
+	per le richieste http e Web Socket. I passi essenziali della gestione della socket sono i seguenti:
+		- OnConnect: Usiamo un vettore di connessioni WS per salvare tutti gli utenti connessi e per determinare l’owner della partita.
+		- OnMessage: Sviluppiamo le seguenti casistiche...
+						A)	App -> Server: L’applicativo invia la griglia di gioco sotto forma di matrice canvas agli utenti connessi.
+						B)	Pagina -> Server: La pagina web comunica “canvasready” ed il server memorizza la connessione
+						C)	App -> Server: L’applicativo comunica di essersi connesso, MSGID “setcontroller”, ed il server memorizza la connessione del controller
+						D)	Pagina -> App: Una pagina invia un comando verso il controller
+		- OnClose: Al momento della disconnessione, se necessario, assegnammo un nuovo owner della partita.	
 
--	<a href='https://github.com/alequaranta/iss2026quaranta/tree/main/ConwayLife/intSprint3/conway26GuiHtml/src/main/resources/page'>File</a> statici erogati dal Server 
-	
+-	<b>APPLICATIVO</b>
+
+	<b><a href='https://github.com/alequaranta/iss2026quaranta/blob/main/ConwayLife/Sprint3/conway26GuiHtml/src/main/java/conway26appl/OutInGuiInteraction.java'>Implementazione di IoutDev - OutInGuiInteraction.java</a></b>
+	Come già discusso, la nuova implementazione di IOutDev (che implementera anche IObserver) supporta la visione di “mondo” sviluppata da noi:
+		- Crea una interconnessione con il Server
+		- Se devo inviare messaggi sulla socket 
+		  -> il controller sfrutta i metodi di IOutDev
+		- Se devo ricevere messaggi sulla socket 
+		  -> devo sfruttare la proprietà Observable dell’interconnessione WS 
+		  e (precedentemente) iniettare nella classe il controller in maniera tale da fargli poter eseguire comandi.	
+		  
+	<b><a href='https://github.com/alequaranta/iss2026quaranta/blob/main/ConwayLife/Sprint3/conway26GuiHtml/src/main/java/conway26appl/LifeGameInteraction.java'>Main Thread Applicativo - LifeGameInteraction.java</a></b>
+	Set up ed iniezione del controller nell’implementazione di IOutDev.
+	 
 </pre>
 <h2>Testing</h2> 
  

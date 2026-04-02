@@ -76,12 +76,7 @@ public class IoJavalin {
 
         		CommUtils.outcyan(name + " | nuova connesione: " + callerName);
 
-        		// ASSEGNAZIONE OWNER
-        		if (ownerCtx == null) {
-        			ownerCtx = ctx;
-        			firstCaller = callerName;
-        			CommUtils.outmagenta(name + " | owner assegnato a: " + callerName);
-        		}
+        		
         	});
 
              
@@ -116,7 +111,13 @@ public class IoJavalin {
                     
                     if(  m.msgReceiver().equals(name) && m.msgContent().contains("canvasready") ) { 
                     	allConns.add(ctx);
-                    	CommUtils.outgray(name + " |  memorizzo page Ctx: " + ctx);
+                    	CommUtils.outgray(name + " | memorizzo page Ctx: " + ctx);
+                    	
+                    	// ASSEGNAZIONE OWNER
+                		if (ownerCtx == null) {
+                			ownerCtx = ctx;
+                			CommUtils.outmagenta(name + " | owner assegnato a: " + m.msgSender());
+                		}
                     
                     /* --------------------------------------------------
                      * C) GOF -> SERVER
