@@ -17,11 +17,11 @@ import unibo.basicomm23.msg.ApplMessage;
 public class IoJavalin {
 	
 	private static AtomicInteger pageCounter = new AtomicInteger(0);
-	private WsMessageContext pageCtx, lifeCtrlCtx ;
+	private WsMessageContext  lifeCtrlCtx;
 	private String name;
 	private String firstCaller        = null;
-	//private WsConnectContext ownerctx = null;
-	protected Vector<WsConnectContext> allConns = new Vector<WsConnectContext>();
+	private WsContext ownerCtx = null;
+	protected Vector<WsContext> allConns = new Vector<>();
 
 	public IoJavalin(String name) {
 		this.name = name;
@@ -47,13 +47,7 @@ public class IoJavalin {
  * --------------------------------------------
  */
         app.get("/", ctx -> {
-    		//Path path = Path.of("./src/main/resources/page/ConwayInOutPage.html");    		    
-        	/*
-        	 * Java cercherà il file all'interno del Classpath 
-        	 * (dentro il JAR o nelle cartelle dei sorgenti di Eclipse), 
-        	 * rendendo il codice universale
-         	 */
-        	//var inputStream = getClass().getResourceAsStream("/page/ConwayInOutPage.html");  
+    		  
         	var inputStream = getClass().getResourceAsStream("/page/LifeIInOutCanvas.html");     
         	if (inputStream != null) {
         		// Trasformiamo l'inputStream in stringa (o lo mandiamo come stream)
@@ -62,138 +56,127 @@ public class IoJavalin {
         	} else {
 		        ctx.status(404).result("File non trovato nel file system");
 		    }
-		    //ctx.result("Hello from Java!"));  //la forma più semplice di risposta
         }); 
         
-//        app.get("/greet/{name}", ctx -> {
-//            String pname = ctx.pathParam("name");
-//            ctx.result("Hello, " + pname + "!");
-//        }); //http://localhost:8080/greet/Alice
-//        
-//        app.get("/api/users", ctx -> {
-//            Map<String, Object> user = Map.of("id", 1, "name", "Bob");
-//            ctx.json(user); // Auto-converts to JSON
-//        });
-        
-        /*
-         * Javalin v5+: Si passa solo la "promessa" (il Supplier del Future). 
-         * Javalin è diventato più intelligente: se il Future restituisce una Stringa, 
-         * lui fa ctx.result(stringa). Se restituisce un oggetto, lui fa ctx.json(oggetto).
-         * 
-         */
-//        app.get("/async", ctx -> {
-//        	ctx.future(() -> {
-//	        	// Creiamo il future
-//	            CompletableFuture<String> future = new CompletableFuture<>();
-//	            
-//	            // Eseguiamo il lavoro in un altro thread
-//	            new Thread(() -> { 
-//	                try {
-//	                    Thread.sleep(2000); // Simulazione calcolo pesante
-//	                    future.complete(name + " | Risultato calcolato asincronamente");
-//	                } catch (Exception e) {
-//	                    future.completeExceptionally(e);
-//	                }
-//	            });
-//	            
-//	            return future; // Restituiamo il future a Javalin
-//        	});
-//        });
-//        
-//        app.get("/async1", ctx -> {
-//            ctx.future(() -> CompletableFuture.supplyAsync(() -> {
-//                // Simuliamo l'operazione lenta
-//                try {
-//                    Thread.sleep(2000); 
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//                return name + " | Risultato calcolato con supplyAsync";
-//            }));
-//        });
+
 /*
  * --------------------------------------------
  * Parte Websocket
  * --------------------------------------------
  */      
         app.ws("/eval", ws -> {
-            ws.onConnect(
-		            ctx -> { //myctx=ctx; 
-    	        int idAssegnato = pageCounter.incrementAndGet();
-    	        String callerName = "caller"+idAssegnato;
-     	        sendsafe(ctx, "ID:" + callerName);
-     			if( firstCaller == null ) {
-     				firstCaller = callerName;
-     				//ownerctx    = ctx;
-     			}
-     			CommUtils.outmagenta("connected ..." + callerName);
-     			allConns.add(ctx);
-     			 
-        // Ogni 20 secondi invia un segnale per "svegliare" i proxy
-//    	heartbeatTask = executor.scheduleAtFixedRate(
-//            () -> { if(ctx.session.isOpen()) sendsafe(ctx,"PING");}, //lambda // CommUtils.outcyan("PING");
-//                    20,  //QUANTO ASPETTARE LA PRIMA VOLTA. Se 0, il primo PING parte istantaneamente (inutile)
-//                    20,  //OGNI QUANTO RIPETERE
-//                    TimeUnit.SECONDS
-//            );
-		            });
+            
+
+        	ws.onConnect(ctx -> {
+        		int id = pageCounter.incrementAndGet();
+        		String callerName = "caller" + id;
+
+        		sendsafe(ctx, "ID:" + callerName);
+        		allConns.add(ctx);
+
+        		CommUtils.outcyan(name + " | nuova connesione: " + callerName);
+
+        		// ASSEGNAZIONE OWNER
+        		if (ownerCtx == null) {
+        			ownerCtx = ctx;
+        			firstCaller = callerName;
+        			CommUtils.outmagenta(name + " | owner assegnato a: " + callerName);
+        		}
+        	});
+
              
             ws.onMessage(ctx -> {
+            	
                 String message = ctx.message();     
+                
                 try {
-                	//La pagina e il mondo esterno comuicano col server con IApplMessage
                 	IApplMessage m = new ApplMessage(message);
-                    //CommUtils.outblue(name + " |  eval:" + m.msgContent() );
+                    
+                	
+                	/* --------------------------------------------------
+                	 * A) GOF -> PAGES
+                	 * Invio griglia alle pagine connesse
+                	 *  
+                	 */
+                	
                 	if( m.msgContent().startsWith("[[")) {
-                		pageCtx.send( m.msgContent()); 
+                		CommUtils.outyellow(name + " | inoltro griglia di gioco");
+                		for (WsContext conn : allConns) {
+                		    sendsafe(conn, m.msgContent());
+                		}
                 		return;
                 	}
-                    CommUtils.outcyan(name + " |  eval receives:" + message + " pageCtx=" + (pageCtx!=null) + " allConns:" +allConns.size());
-                    if(  m.msgSender().equals("unknown") && m.msgContent().contains("canvasready") && pageCtx==null) { 
-                    	pageCtx = ctx;  //memorizzo connessione pagina
-                    	CommUtils.outmagenta(name + " |  memorizzo pageCtx:" + pageCtx);
-                    }else if( m.msgSender().equals("lifectrl") && m.msgId().contains("setcontroller")) { 
+                    
+                    
+                    /* --------------------------------------------------
+                	 * B) PAGES -> SERVER
+                	 * Canvas pronto, salva CTX pagina
+                	 *  
+                	 */
+                    
+                    if(  m.msgReceiver().equals(name) && m.msgContent().contains("canvasready") ) { 
+                    	allConns.add(ctx);
+                    	CommUtils.outgray(name + " |  memorizzo page Ctx: " + ctx);
+                    
+                    /* --------------------------------------------------
+                     * C) GOF -> SERVER
+                     * Set del controller, salva CTX controller
+                     *  
+                     */
+                    
+                    }else if( m.msgReceiver().equals(name) && m.msgSender().equals("lifectrl") && m.msgId().contains("setcontroller")) { 
                     	lifeCtrlCtx = ctx; //memorizzo connessione controller
-                    	CommUtils.outmagenta(name + " |  memorizzo lifeCtrlCtx:" + lifeCtrlCtx );
-            			sendsafe( lifeCtrlCtx, "msg( eval, dispatch, caller1, lifectrl, clear, 0 )" );
-                     }else if( m.msgReceiver().equals(name) && m.msgContent().contains("cell(")) {                   
-                    	if (pageCtx != null) {
-                        	//Funziona se ci sono 3 arg - es. cell(5,6,1)
-                    		pageCtx.send( m.msgContent()); 
-                     	}
-                    	if( m.isRequest() ) {  //m viene da fuori, non dalla pagina
-                    		IApplMessage reply = CommUtils.buildReply(name,"replyTo_"+m.msgId(),"done",m.msgSender()); 
-                    		ctx.send(reply.toString());
-                      	}else if( m.msgSender().equals(firstCaller) ){
-                     		//ctx.send("updateCellColor sent from page");
-                     		CommUtils.outmagenta("lifeCtrlCtx send " + m);
-                    		if( lifeCtrlCtx != null ) 
-                    			sendsafe( lifeCtrlCtx, m.toString() );
-                     	}
+                    	CommUtils.outgray(name + " |  memorizzo lifeCtrl Ctx: " + lifeCtrlCtx );
+                    	//server ordina di ri-inizializzare la griglia di gioco
+            			sendsafe( lifeCtrlCtx, "msg( eval, dispatch, guiserver, lifectrl, clear, 0 )" );
+           
+            		/* --------------------------------------------------
+                     * D) PAGES -> GOF
+                     * Server funge da ponte verso il controller
+                     *  
+                     */	
                     	
                     }else if( m.msgReceiver().equals("lifectrl") ) {  
                      	if( m.msgSender().equals("unknown") ){
                     		//Nuova paginna collegata
                     		return;
                     	}
-                    	if( m.msgSender().equals(firstCaller) ){
-                       		CommUtils.outblue(name + " sending to lifeCtrlCtx: " + m);
+                    	if( ctx.equals(ownerCtx) ){
+                       		CommUtils.outblue(name + " | owner invia al controller: " + m);
                     		if( lifeCtrlCtx != null ) 
                     			sendsafe( lifeCtrlCtx, m.toString() );
-                    		//msg( eval, dispatch, caller1, lifectrl, clear, 0 )
                      	}else {
-                     		CommUtils.outred("lifeCtrlCtx send to page ???" + m.msgContent() );
-//                    		if( pageCtx != null ) 
-//                    			sendsafe( pageCtx,  m.msgContent() );                   		
+                     		CommUtils.outgray(name +" | viewer tenta di interagire - " + m.msgSender());
+                    		                 		
                      	}
                     }
-//                    CommUtils.outcyan(name + " |  allConns:" +allConns.size());
-//                    allConns.forEach( (conn) ->	conn.send(m.msgContent()) );
+                    
                 }catch(Exception e) {
-                	CommUtils.outred(name + " |  not a IApplMessage:" + message);
-//                	allConns.forEach( (conn) ->	conn.send(message) );
+                	CommUtils.outred(name + " |  not a IApplMessage: " + message);
+
                 }               
             });
+            
+
+            ws.onClose(ctx -> {
+                allConns.remove(ctx);
+
+                //se non era l’owner non fare nulla
+                if (ctx != ownerCtx)
+                    return;
+
+                CommUtils.outmagenta(name + " | owner della partita disconnesso");
+
+                //scegli un nuovo owner se disponibile
+                if (!allConns.isEmpty()) {
+                    ownerCtx = allConns.get(0);
+                    CommUtils.outmagenta(name + " | nuovo owner assegnato: " + ownerCtx);
+                } else {
+                    ownerCtx = null;
+                    CommUtils.outgray(name + " | in attesa di nuove connesioni");
+                }
+            });
+
         });        
 	}
 	

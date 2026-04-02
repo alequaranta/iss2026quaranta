@@ -1,0 +1,232 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+
+<link rel="stylesheet" type="text/css" href="css/mystyle.css">
+<!--
+    <script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+    
+</head>
+   
+<title>conway26GUIHtml</title></head>
+    
+
+<body>
+<div id="top">
+<h1>ConwayLife Sprint3</h1>
+</div>  
+
+<div class="body">  
+
+<h2>Introduction</h2>
+<b>Goal</b>: Realizzare una GUI HTML per il gioco Conway Game of Life.
+ 
+<h2>Requirements</h2>
+
+ 
+<!-- <div class="remark"> -->
+<pre>
+
+-   Realizzare una GUI HTML per il gioco Conway Game of Life.
+	
+- 	1. Chi comanda?. Nel caso di più utenti, questi potranno vedere la stessa griglia o ognuno vedrà la sua griglia?
+	
+	• il committente precisa che tutti gli utenti potranno vedere la evoluzione della stessa griglia, ma solo
+	uno potrà inviare comandi di gestione del gioco. Questo utente privilegiato (detto owner) sarà l’utente che
+	ha aperto per primo la pagina HTML.
+	
+	2. Chi crea la GUI? Si modifica il Progetto ConwayLife26 o è meglio lasciare il più possibile inalterato questo
+	software già testato?
+	
+	• meglio modificare meno possibile ciò che già funziona. Il Progetto ConwayLife26 è stato impostato in
+	modo da essere estendibile senza dover modificare la logica del gioco. In particolare, la parte di output
+	della GUI potrebbe essere aggiornata introducendo una nuova classe che implementa la IOutDev interface
+	in modo da visualizzare lo stato delle celle nella pagina HTML.
+	
+	• vi sono framework che permettono di realizzare pagine HTML che interagiscono con un server senza dover
+	modificare il software già realizzato in Java.
+	
+	3. Come si aggiorna? La pagina HTML deve essere aggiornata in modo automatico o l’utente deve premere un
+	pulsante per vedere lo stato delle celle?
+	
+	• la pagina HTML deve essere aggiornata in modo automatico (per tutti gli utenti connessi) durante la
+	evoluzione del gioco, senza che un utente debba fare nulla. Questo richiede l’uso di WebSocket che per-
+	mettono di inviare messaggi dal server alla pagina HTML.
+	
+	
+</pre>
+  
+
+<h2>Requirement analysis</h2>
+<pre>
+
+-	<b>Preproduzioni</b>	
+	Svilupperemo lo Sprint 3 richiesto dal commitente. 
+	E' stato eseguito il deploy, sotto forma di libreria .jar, dell'architettura sviluppata nello Sprint 1.
+	Sarà il nostro punto di partenza.
+
+-	<b>Architettura del sistema</b>	
+	Scegliamo un architettura che vede il Server, nel nostro caso Javalin, esterno all'applicazione.
+	L'interazione al servzio avverà, come chiesto dal committente, tramite tecnologia Web Socket sulla porta 8080.
+
+-	<b>Vincoli tra le pagine</b>
+	Tutti gli utenti connettendosi potranno vedere l'evoluzione della stessa partita.
+	Solo l'utente considerato owner potrà impartire comandi all'applicazione.
+	Specifichiamo fin da subito che sarà necessario salvare le connesione degli utenti sul Server:
+	<code>
+		private WsMessageContext  lifeCtrlCtx;
+		private WsContext ownerCtx = null;
+		protected Vector&lt;WsContext&gt; allConns = new Vector<>();
+	</code>
+	
+</pre>
+
+<h2>Problem analysis</h2>
+<pre>
+	
+	<img src="./img/esterno.png" alt="emiglio" width="40%" height="40%">
+
+-	<b>Architettura ed enti attivi</b>	
+	L'architettura scelta implica la presenza di minimo tre enti attivi:
+		- L'applicativo di gioco (basato su quanto realizzato nello Sprint1)
+		- Il Server Javalin (IoJavalin)
+		- La Pagina Web collegata via Browser
+	e di conseguenza minimo due canali di comunicazione (lifeCtrlCtx, pageCtx).
+	
+	<img src="./img/schema.png" alt="emiglio" width="50%" height="50%">
+
+-	<b>Messagggi</b>
+	Gli enti attivi comunicarenno attreverso il contratto imposto sui messaggi
+	da IApplMessag (unibo.basicomm23.interfaces.IApplMessage).
+	Un IApplMessag sotto forma di stringa appare come segue:
+		 <code>msg( MSGID, MSGTYPE, SENDER, RECEIVER, CONTENT, SEQNUM )</code>
+	
+	I payload riconosciuti dal nostro sistema sono i seguenti:
+	<code>
+		{
+			canvasready, //la pagina web vuole registrare la propria connesione BROWSER -> SERVER
+			start, //cmd BROWSER -> CONTROLLER
+			stop, //cmd
+			clear, //cmd
+			exit, //cmd
+			cell(x, y) //dispatch cambio stato cella BROWSER -> CONTROLLER
+			cell(x, y, v) //dispatch cambio stato cella CONTROLLER -> BROWSER
+			ID: name //assegnazione id a pagina web (vedi sotto) SERVER -> BROWSER
+			[[...]] //matrice di rappresentazione griglia (vedi sotto) CONTROLLER -> BROWSER
+		}
+	</code>
+	
+	Per chiarezza comunicativa e sulla base della sintassi IApplMessage 
+	diamo un nome a ciascuno degli enti attivi:
+		- Server Javalin: guiserver
+		- Applicazione: lifectrl
+		- Pagina Web x: callerx (assegnato dal server)
+	Il Server comunica alla Pagina Web il proprio nome: <code>ID: name</code>
+
+-	<b>Nuova pagina HTML</b>
+	La pagina HTML restituita all'utente sfrtutterà &lt;canvas&gt; di HTML5 che definisce
+	un'area di disegno facilmente modificabile tramite Javascript.
+	
+	Quando il server manda un messaggio che contiene “[[…” sta inviando una matrice di booleani 
+	che identica lo stato della griglia di gioco. La sintassi JSON esprime una semantica chiara 
+	e coincisa ai fini del gioco. Ad esempio, una matrice 5x5 apparirebbe come:
+	
+	[
+	 [true,  false, false, false, true],
+	 [false, true,  false, true,  false],
+	 [false, false, true,  false, false],
+	 [false, true,  false, true,  false],
+	 [true,  false, false, false, true]
+	]
+	
+	true: cella viva, false: cella morta
+
+-	<b>Analisi della comunicazione</b>
+	1)	Da Browser a Server i messaggi dovranno assumere la forma di IApplMessage.
+		Questa volta la rappresentazione è ancora più essenziale! Ci permette di capire chi ha inviato il messaggio e chi lo deve ricevere, 
+		indipendentemente dal fatto che i componenti siano connessi o meno.
+		I messaggi inviati sono fire-and-forget: dispatch.
+	2)	Dal Server alla pagina Browser i comandi andranno espressi come semplici stringhe, sarà il codice Javascript a gestirli. 
+		I comandi vanno inoltrati a tutte le pagine connesse.
+	3)  L’interazione Applicativo e Server va analizzata da più punti di vista.
+		> L’implementazione di IOutDev deve implementare anche IObserver.
+		  Sftutteremo un concetto di interconnesione di alto livello sviluppato da noi: unibo.basicomm23.interfaces.Interaction.
+		  L'entità creerà una connesione Web Socket al Server (specifica di Interaction):
+		  	
+		    <code> 
+				private Interaction conn ;
+				conn = WsConnection.create("localhost:8080", "eval", this);
+			</code>
+			
+		La connesione stessa è configurata come oggetto Observable 
+		(ragion per cui implementiamo IObserver di unibo.basicomm23.interfaces.IObserver;)
+		in maniera tale da poter "osservare" e gestire i messaggi sulla socket.
+		
+		    <code> public class OutInGuiInteraction implements IOutDev, IObserver{ </code>
+				
+		> Lato Applicativo devo anche comunicare al Server “Ehi io sono il controller e questo è il mio ctx!” 
+		  in maniera tale che il Server sappia a chi inoltrare i messaggi ricevuti da Browser:
+		  
+		  <code>
+			protected void connectToServer() {
+			 if( conn == null  )
+				try {
+				conn = WsConnection.create("localhost:8080", "eval",this);
+			      IApplMessage cmdmsg = CommUtils.buildDispatch("lifectrl", "setcontroller", "set", "guiserver"  );
+				conn.forward(cmdmsg);
+					} catch (Exception e) {
+			 			e.printStackTrace();
+					}		
+				}
+		  </code>
+
+		 > Lato Server un IApplMessage con MSGID = "setcontroller" viene riconosiuto
+
+</pre>
+
+<h2>Test plans</h2> 
+
+<h2>Project</h2> 
+<pre>
+	
+-	Server <a href='https://github.com/alequaranta/iss2026quaranta/blob/main/ConwayLife/intSprint3/conway26GuiHtml/src/main/java/conway/io/IoJavalin.java'>IoJavalin</a>
+
+-	Nuova implementazione del contratto IOutDev <a href='https://github.com/alequaranta/iss2026quaranta/blob/main/ConwayLife/intSprint3/conway26GuiHtml/src/main/java/conway/io/WebOutDev.java'>WebOutDev</a>
+
+-	<a href='https://github.com/alequaranta/iss2026quaranta/tree/main/ConwayLife/intSprint3/conway26GuiHtml/src/main/resources/page'>File</a> statici erogati dal Server 
+	
+</pre>
+<h2>Testing</h2> 
+ 
+
+<h2>Deployment</h2> 
+<pre>
+
+-	Build dell'immagine e distribuzione tramite Docker
+
+</pre>
+ 
+<h2>Maintenance</h2> 
+ 
+<!-- USEFUL
+<table style="width:100%" border="1">
+<tr>
+<td style="width:50%">
+</td>
+<td></td>
+</tr>
+</table>
+-->
+	      	
+<br/><br/> 	
+</div>  
+
+<div style="background-color:rgba(86, 56, 253, 0.9); width:60%;text-align:left;color:white">
+	By studentName email: alessandro.quaranta@studio.unibo.it, 
+	<!-- <img src="./img/mbot-S.jpg" alt="mbot" width="15%" height="15%"> -->
+	<img src="./img/alessandro.jpg" alt="emiglio" width="15%" height="15%">
+	GIT repo: https://github.com/alequaranta/iss2026quaranta
+</div> 
+</body>
+</html>

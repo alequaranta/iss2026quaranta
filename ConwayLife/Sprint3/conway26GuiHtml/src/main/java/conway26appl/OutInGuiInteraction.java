@@ -32,8 +32,8 @@ public class OutInGuiInteraction implements IOutDev, IObserver{
 	protected void connectToServer() {
 		if( conn == null  )
 		try {
-			CommUtils.outgreen(name + " | connectToServer ..................... :");
-			conn = WsConnection.create("localhost:8080", "eval",this);
+			CommUtils.outgreen(name + " | connesione al server");
+			conn = WsConnection.create("localhost:8080", "eval", this);
 	     	IApplMessage cmdmsg = CommUtils.buildDispatch("lifectrl", "setcontroller", "set", "guiserver"  );
 	     	CommUtils.outblue("LifeGameInteraction | forward " + cmdmsg);
 	     	conn.forward(cmdmsg);
