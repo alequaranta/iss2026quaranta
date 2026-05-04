@@ -1,0 +1,116 @@
+System sistemasqak 
+/*
+ * sistemas : servizio che valuta il valore di una funzione
+ * 
+ */
+ 
+Dispatch eval : arg(V)
+Request evalr : argr(V)
+Reply ereplay : value(V) for evalr
+
+Context ctxsistemas ip [host="localhost" port=8010]
+
+//--------------------
+
+QActor sistemas context ctxsistemas{
+	
+	[#
+	   fun eval(x: Double): String{
+	   	 val R = 3*x
+	   	 return ""+R
+	   }	
+	   
+	#]
+	
+	State s0 initial{
+		println("sistemas | init") color green
+	}
+	Goto waitMsg
+	
+	State waitMsg{
+		println("sistemas | waiting for msg") color cyan
+	}
+	Transition t0
+	 whenMsg eval -> handleEval
+	 whenRequest evalr -> handleReq
+	 
+	 
+	//-- DISP -------
+	
+	State handleEval{
+		
+		println("$name | msg=$currentMsg") color cyan
+		
+		onMsg(eval : arg(X)){
+			
+			/*
+			 * Se unifica con payloadArg(0) prendimo il valore di X
+			 * Lo dobbiamo poi trasformare in un double
+			 */
+			[#
+			  val VString = payloadArg(0)
+			  val V = VString.toDouble()
+			  val R = eval(V)	
+			#]
+			println("sistemas | result = $R") color cyan
+			
+		}
+		
+		}Goto waitMsg
+		
+		//--- REQ ------
+		
+		State handleReq{
+		
+		println("$name | msg=$currentMsg") color cyan
+		
+		[# var R = "" #]
+		
+		onMsg(evalr : argr(X)){
+			
+			[#
+			  val VString = payloadArg(0)
+			  val V = VString.toDouble()
+			  R = eval(V)	
+			#]
+			
+			println("sistemas | result = $R") color cyan
+			
+		}
+		
+		replyTo evalr with ereplay : value($R)
+		
+		
+		}Goto waitMsg
+	
+}
+
+//--------------------
+
+QActor callermock context ctxsistemas{
+	
+	State s0 initial{
+		println("callermock | init") color green
+		
+		[#
+		 val V = "2.0"	
+		 val Y = "3.0"	
+		#]
+		
+		println("$name | send dispatch") color magenta
+		forward sistemas -m eval : arg($V)
+		
+		delay 1000
+		println("$name | send request") color magenta
+		request sistemas -m evalr : argr($Y)
+	}
+	Transition t0
+		whenReply ereplay -> handleReplay
+		
+	
+	State handleReplay{
+		println("$name | msg=$currentMsg") color magenta
+	}
+	
+	
+}

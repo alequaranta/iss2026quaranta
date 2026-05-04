@@ -1,0 +1,97 @@
+System firefly
+
+Dispatch cellstate : cellstate(X, Y, COLOR)
+
+Context ctxfirefly ip [ host="localhost" port=8040] 
+Context ctxgrid ip [host="127.0.0.1" port=8050 ]
+//127.0.0.1
+
+//--CREATOR---------------------------
+
+QActor creator context ctxfirefly{
+	State s0 initial{    
+   	 	[#   
+		 clearlog("./logs/app_firefly.log") 	//vedi src/main/resources/logback.xml
+	 	#]
+		delay 500 
+//		[# logger.info(  "${currentState.stateName} creates 25 firefly "  ) #]
+ 		create firefly _"1" //confined omitted
+		create firefly _"2"
+		create firefly _"3"
+		create firefly _"4"
+		create firefly _"5"
+	
+
+/* 
+  [#
+	    	for( i in 0..19 ){
+	    		for( j in 0..19 ){
+	    			CommUtils.outcyan("$name | CREATES firefly_${i}_${j}")  
+	    			createActorDynamically( "firefly", "_${i}_${j}", false)
+	    		}
+	    	}		 
+    	#]
+ */
+ 	} 
+}   
+
+//--FF-------------------------------
+
+QActor firefly context ctxfirefly dynamicOnly{
+	
+	[#  var Timer = 500L
+    		var X = 1
+    		var Y = 1
+    		var ON = 1
+    		var OFF = 0
+    		
+    		 fun setCellCoords( )  {
+     		val coordY = name.replace("firefly_","")    
+      		Y  = coordY.toInt()        
+  		    }		
+    		
+    		
+    #]
+	
+	State s0 initial{
+		[# setCellCoords()                                   #]
+		[# Timer = java.util.Random().nextLong(1000L,2000L )  #] 
+		printCurrentMessage color cyan
+	}
+	Goto flash 
+	
+	State flash{
+   
+		delayVar Timer
+		//TurnoOn
+	//	println("$name | turnOn $Timer") color magenta
+		forward griddisplay -m cellstate : cellstate($X, $Y, $ON)
+		delayVar Timer
+		//TurnoOff
+	//	println("$name | turnOff $Timer") color cyan
+		forward griddisplay -m cellstate : cellstate($X, $Y, $OFF)
+	}
+	Transition t0
+		whenTime 500 -> flash
+	
+}
+
+//--GRID-------------------------------
+/* 
+QActor griddisplaymock context ctxfirefly{
+	
+	State s0 initial{
+		printCurrentMessage color blue
+	}
+	Transition t0
+	 whenMsg cellstate -> msghandle
+	
+	State msghandle{
+		printCurrentMessage color green
+	}
+	Transition t1
+		whenMsg cellstate -> msghandle
+}
+*/
+
+ExternalQActor griddisplay context ctxgrid

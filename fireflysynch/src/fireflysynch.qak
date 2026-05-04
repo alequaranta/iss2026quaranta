@@ -1,0 +1,175 @@
+System fireflysynch
+
+/* 
+ * modello dell'analista;
+ * 
+ * 
+ * */
+
+Dispatch cellstate : cellstate(X, Y, COLOR)
+Dispatch synch : changed(SOURCE,TIME)
+
+
+Context ctxfirefly ip [ host="localhost" port=8040] 
+Context ctxgrid ip [host="127.0.0.1" port=8050 ]
+
+
+/* -------------------------------------------------------------------------
+ * CREATOR
+ * 
+ * -------------------------------------------------------------------------
+ */
+
+QActor creator context ctxfirefly{
+	State s0 initial{    
+   	 	[#   
+		 clearlog("./logs/app_firefly.log") 
+	 	#]
+		delay 500 
+//		[# logger.info(  "${currentState.stateName} creates 25 firefly "  ) #]
+		create firefly _"2"
+		create firefly _"3"
+		
+/*
+ * [#
+	    	for( i in 0..19 ){
+	    		for( j in 0..19 ){
+	    			CommUtils.outcyan("$name | CREATES firefly_${i}_${j}")  
+	    			createActorDynamically( "firefly", "_${i}_${j}", false)
+	    		}
+	    	}		 
+    	#]
+ */
+ 	} 
+}   
+
+
+/* -------------------------------------------------------------------------
+ * FF: QUEEN
+ * dopo 10 secondi determina la frequenza delle altre lucciole
+ * 
+ * -------------------------------------------------------------------------
+ */
+
+QActor firefly_queen context ctxfirefly{
+	
+	[#  
+		    var Timer = 500L
+    		var X = 1
+    		var Y = 1
+    		var ON = 1
+    		var OFF = 0	
+    		var SYNCH = false
+    		var startTime = 0L
+    			
+    #]
+	
+	//---STATE:INIT--------------------
+	State s0 initial{
+		[# Timer = java.util.Random().nextLong(1000L,2000L )  #] 
+		printCurrentMessage color green
+		// inizia a contare 10 secondi
+		[#  startTime = System.currentTimeMillis() #]
+		println("$name | init Queen") color green
+		
+	}
+	Goto flash
+	
+	//---STATE:FLASH---------------------
+	State flash{
+   
+		//TurnoOn
+		println("$name | turnOn $Timer") color magenta
+		forward griddisplay -m cellstate : cellstate($X, $Y, $ON)
+		delayVar Timer
+		//TurnoOff
+		println("$name | turnOff $Timer") color cyan
+		forward griddisplay -m cellstate : cellstate($X, $Y, $OFF)
+	
+		if [# !SYNCH && System.currentTimeMillis() - startTime >= 10000 #]{
+			println("$name | SYNCH") color green
+			updateResource [# "$name,$Timer" #]
+			[# SYNCH = true #]
+		}
+	
+
+	}
+	Transition t0
+		whenTimeVar Timer -> flash
+	
+}
+
+/* -------------------------------------------------------------------------
+ * FF: WORKER
+ * dopo 10 secondi si sincronizza con la regina
+ * 
+ * -------------------------------------------------------------------------
+ */
+
+QActor firefly context ctxfirefly dynamicOnly{
+	
+	[#  
+		    var Timer = 500L
+    		var X = 1
+    		var Y = 1
+    		var ON = 1
+    		var OFF = 0
+    		
+    		fun setCellCoords( )  {
+     		  val coordY = name.replace("firefly_","")    
+      		  Y  = coordY.toInt()     
+  		    }		
+    			
+    #]
+	
+	//---STATE:INIT--------------------
+	State s0 initial{
+		[# setCellCoords()                                    #]
+		[# Timer = java.util.Random().nextLong(1000L,2000L )  #] 
+		printCurrentMessage color cyan
+		
+		observeResource firefly_queen msgid synch
+		
+	}
+	Goto flash
+	
+	//---STATE:FLASH---------------------
+	State flash{
+  
+		//TurnoOn
+		println("$name | turnOn $Timer") color magenta
+		forward griddisplay -m cellstate : cellstate($X, $Y, $ON)
+		delayVar Timer
+		//TurnoOff
+		println("$name | turnOff $Timer") color cyan
+		forward griddisplay -m cellstate : cellstate($X, $Y, $OFF)
+	
+
+	}
+	Transition t0
+		whenTimeVar Timer -> flash
+		whenMsg synch ->  newtimer
+	
+	//---STATE:CHANGE TIMER---------------------
+	State newtimer{
+		
+      onMsg( synch : changed(SOURCE,TIME) ){
+        [#
+            val t = payloadArg(1)
+            Timer = t.toLong()
+        #]
+    }
+	}
+	Goto flash
+	
+}
+
+/* -------------------------------------------------------------------------
+ * GUI
+ * 
+ * 
+ * -------------------------------------------------------------------------
+ */
+ 
+ExternalQActor griddisplay context ctxgrid
+
