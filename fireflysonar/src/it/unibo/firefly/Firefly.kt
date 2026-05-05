@@ -35,6 +35,7 @@ class Firefly ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 		    		var Y = 1
 		    		var ON = 1
 		    		var OFF = 0
+		    		var SYNCH = 0
 		    		
 		    		fun setCellCoords( )  {
 		     		  val coordY = name.replace("firefly_","")    
@@ -81,11 +82,13 @@ class Firefly ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 								        	var s = payloadArg(1)
 								if(  s == "1"  
 								 ){ var t = payloadArg(2)
-								            	Timer = t.toLong()  
+								            	Timer = t.toLong() 
+								            	SYNCH = 1  
 								}
-								else
-								 { Timer = java.util.Random().nextLong(1000L,2000L )   
-								 }
+								if(  SYNCH == 1 && s == "0" 
+								 ){ Timer = java.util.Random().nextLong(1000L,2000L )  
+								        		SYNCH = 0
+								}
 						}
 						//genTimer( actor, state )
 					}
