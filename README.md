@@ -21,5 +21,7 @@ Laboratorio di <b>Ingegneria dei Sistemi Software</b> a.a. 2025/2026 di Quaranta
  * [ConwayLife Sprint3]: evoluzione del sistema in locale
    usando una pagina HTML come dispositivo di I/O. <i>Distribuzione</i>: Docker yaml.
 
- ### Sistemi come servizi
- * ...
+ ### Sistemi ad Attori con QAK
+ * [SistemaS]: valutazione di una funzione matematica eval()
+ * [FireFlySynch]: reqA) sincronizzazione di 3 lucciole (prototipo)
+
