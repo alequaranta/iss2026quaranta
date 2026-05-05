@@ -1,0 +1,179 @@
+System fireflysynch
+
+/* 
+ * modello dell'analista;
+ * 
+ * 
+ * */
+
+Dispatch cellstate : cellstate(X, Y, COLOR)
+Dispatch synch : changed(SOURCE, SYNCH, TIME)
+
+
+Context ctxfirefly ip [ host="localhost" port=8040] 
+Context ctxgrid ip [host="127.0.0.1" port=8050 ]
+
+
+/* -------------------------------------------------------------------------
+ * CREATOR
+ * 
+ * -------------------------------------------------------------------------
+ */
+
+QActor creator context ctxfirefly{
+	State s0 initial{    
+   	 	[#   
+		 clearlog("./logs/app_firefly.log") 
+	 	#]
+		delay 500 
+//		[# logger.info(  "${currentState.stateName} creates 25 firefly "  ) #]
+		create firefly _"1"
+		create firefly _"2"
+		create firefly _"3"
+		
+/*
+ * [#
+	    	for( i in 0..19 ){
+	    		for( j in 0..19 ){
+	    			CommUtils.outcyan("$name | CREATES firefly_${i}_${j}")  
+	    			createActorDynamically( "firefly", "_${i}_${j}", false)
+	    		}
+	    	}		 
+    	#]
+ */
+ 	} 
+}   
+
+
+/* -------------------------------------------------------------------------
+ * FF: 
+ * 
+ * 
+ * -------------------------------------------------------------------------
+ */
+
+QActor firefly context ctxfirefly dynamicOnly{
+	
+	[#  
+		    var Timer = 500L
+    		var X = 1
+    		var Y = 1
+    		var ON = 1
+    		var OFF = 0
+    		
+    		fun setCellCoords( )  {
+     		  val coordY = name.replace("firefly_","")    
+      		  Y  = coordY.toInt()     
+  		    }		
+    			
+    #]
+	
+	//---STATE:INIT--------------------
+	State s0 initial{
+		[# setCellCoords()                                    #]
+		[# Timer = java.util.Random().nextLong(1000L,2000L )  #] 
+		printCurrentMessage color cyan
+		
+		observeResource sonar_mock msgid synch
+		
+	}
+	Goto flash
+	
+	//---STATE:FLASH---------------------
+	State flash{
+  
+		//TurnoOn
+		println("$name | turnOn $Timer") color magenta
+		forward griddisplay -m cellstate : cellstate($X, $Y, $ON)
+		delayVar Timer
+		//TurnoOff
+		println("$name | turnOff $Timer") color cyan
+		forward griddisplay -m cellstate : cellstate($X, $Y, $OFF)
+	
+
+	}
+	Transition t0
+		whenTimeVar Timer -> flash
+		whenMsg synch ->  handle_signal
+	
+	//---STATE:CHANGE TIMER---------------------
+	State handle_signal{
+		
+      onMsg( synch : changed(SOURCE,SYNCH,TIME) ){
+        [#
+        	var s = payloadArg(1)
+        #]
+        
+        if[# s == "1" #]{
+        	 [# var t = payloadArg(2)
+            	Timer = t.toLong() #]     	
+        }
+        else{
+        	[# Timer = java.util.Random().nextLong(1000L,2000L )  #] 
+        }
+        
+     }
+	}
+	Goto flash
+	
+}
+
+/* -------------------------------------------------------------------------
+ * SONAR-MOCK: 
+ * simula il comportamento di un sonar
+ * 
+ * 
+ * -------------------------------------------------------------------------
+ */
+
+QActor sonar_mock context ctxfirefly{
+	
+	[#  
+		    var Timer = 1000L
+    		var DMIN = 100
+    		var SYNCH = 0
+    		var D = 500
+    			
+    #]
+	
+	//---STATE:INIT--------------------
+	State s0 initial{
+		printCurrentMessage color yellow
+		
+	}
+	Goto eval
+	
+	//---STATE: EVAL---------------------
+	State eval{
+  
+  		delay 5000
+  		[# D = java.util.Random().nextInt(10, 150) #]
+		
+		println("$name | new distance: $D") color yellow
+		
+		if [# D < DMIN #]{
+			[# SYNCH = 1 #]
+			println("$name | SYNCH") color yellow
+			updateResource [# "$name,$SYNCH,$Timer" #]
+		}
+		else{
+			[# SYNCH = 0 #]
+			println("$name | FREE") color yellow
+			updateResource [# "$name,$SYNCH,$Timer" #]
+		}
+	
+
+	}
+	Goto eval
+	
+}
+
+/* -------------------------------------------------------------------------
+ * GUI
+ * 
+ * 
+ * -------------------------------------------------------------------------
+ */
+ 
+ExternalQActor griddisplay context ctxgrid
+
